@@ -6,7 +6,6 @@ from datetime import datetime
 
 from .models import Recepten
 from .forms import ReceptForm
-from .auth import refrein
 from . import db
 
 import secrets, os, markdown, json, bleach
@@ -14,21 +13,6 @@ import secrets, os, markdown, json, bleach
 
 @app.route("/", methods=["GET"])
 def index():
-    current_url = request.url.replace('http://', 'https://', 1)
-    auth = request.args.get('auth', None)
-
-    if auth:
-        if not refrein(auth):
-            return render_template('failure.html', msg="Your auth token did not verify"), 401
-
-    try:
-        cookie = session['name']
-    except:
-        cookie = False
-    
-    if not cookie:
-        return render_template('auth.html', current_url=current_url), 401
-
     recepten = Recepten.query.all()
     recepten_tags = Recepten.query.filter(Recepten.tags.isnot(None)).all()
 
@@ -47,21 +31,6 @@ def index():
 
 @app.route("/recept/<token>", methods=["GET"])
 def recept(token):
-    current_url = request.url.replace('http://', 'https://', 1)
-    auth = request.args.get('auth', None)
-
-    if auth:
-        if not refrein(auth):
-            return render_template('failure.html', msg="Your auth token did not verify"), 401
-
-    try:
-        cookie = session['name']
-    except:
-        cookie = False
-    
-    if not cookie:
-        return render_template('auth.html', current_url=current_url), 401
-
     recept = Recepten.query.filter_by(token=token).first_or_404()
 
     allowed_tags = ['tbody', 'th', 'img', 'ins', 'mark', 'sup', 'dl', 'p', 'br', 'abbr', 'hr', 'strong', 'ul', 'li', 'ol', 'pre', 'code', 'thead', 'table', 'td', 'tr', 'a', 'h1', 'h2', 'h3', 'h4', 'h5', 'em', 'blockquote', 'dt', 'dd', 'div']
@@ -73,11 +42,6 @@ def recept(token):
     if recept:
         #recept.recept = markdown.markdown(recept.recept, extensions=['extra', 'tables', 'nl2br'])
         recept.recept = bleach.clean(markdown.markdown(recept.recept, extensions=['extra', 'tables', 'nl2br']), tags=allowed_tags, attributes=allowed_attr)
-    
-    if cookie == recept.nickname:
-        authenticated = True
-    else:
-        authenticated = False
     
     recept_tags = {}
     for item in json.loads(recept.tags):
@@ -92,26 +56,10 @@ def recept(token):
 
     return render_template("recept.html",
                             recept=recept,
-                            recept_tags=recept_tags,
-                            authenticated=authenticated)
+                            recept_tags=recept_tags)
 
 @app.route("/tags/<tag>", methods=["GET"])
 def tags(tag):
-    current_url = request.url.replace('http://', 'https://', 1)
-    auth = request.args.get('auth', None)
-
-    if auth:
-        if not refrein(auth):
-            return render_template('failure.html', msg="Your auth token did not verify"), 401
-
-    try:
-        cookie = session['name']
-    except:
-        cookie = False
-    
-    if not cookie:
-        return render_template('auth.html', current_url=current_url), 401
-
     recepten = Recepten.query.filter(Recepten.tags.contains(tag)).all()
     recepten_tags = Recepten.query.filter(Recepten.tags.isnot(None)).all()
 
@@ -131,28 +79,10 @@ def tags(tag):
 
 @app.route("/toevoegen", methods=["GET", "POST"])
 def toevoegen():
-    current_url = request.url.replace('http://', 'https://', 1)
-    auth = request.args.get('auth', None)
-
-    if auth:
-        if not refrein(auth):
-            return render_template('failure.html', msg="Your auth token did not verify"), 401
-
-    try:
-        cookie = session['name']
-    except:
-        cookie = False
-    
-    if not cookie:
-        return render_template('auth.html', current_url=current_url), 401
-
-    nickname = cookie
-
     form = ReceptForm()
-
-    form.nickname.data = nickname
     
     if form.validate_on_submit():
+        nickname = form.nickname.data
         titel = form.titel.data
         recept = form.recept.data
         tags = json.dumps(form.tags.data)
@@ -176,37 +106,16 @@ def toevoegen():
             abort(400)
 
     return render_template("form.html",
-                            nickname=nickname,
                             form=form)
 
 
 @app.route("/aanpassen/<token>", methods=["GET", "POST"])
 def aanpassen(token=None):
-    current_url = request.url.replace('http://', 'https://', 1)
-    auth = request.args.get('auth', None)
     delete = request.args.get('delete', False)
-
-    if auth:
-        if not refrein(auth):
-            return render_template('failure.html', msg="Your auth token did not verify"), 401
-
-    try:
-        cookie = session['name']
-    except:
-        cookie = False
-    
-    if not cookie:
-        return render_template('auth.html', current_url=current_url), 401
-
-    nickname = cookie
 
     form = ReceptForm()
 
     recept = Recepten.query.filter_by(token=token).first_or_404()
-
-    if recept.nickname != nickname:
-        flash("Dit recept is niet van jou, helaas!", "warning")
-        return redirect(url_for('index'))
 
     form.nickname.data = recept.nickname
 
@@ -224,7 +133,7 @@ def aanpassen(token=None):
         
         try:
             db.session.commit()
-            flash("Je recept is aangepast!", "success")
+            flash("Het recept is aangepast!", "success")
             return redirect(url_for('index'))
         except Exception as e:
             print(e)
@@ -234,7 +143,7 @@ def aanpassen(token=None):
         try:
             Recepten.query.filter_by(token=recept.token).delete()
             db.session.commit()
-            flash("Je recept is verwijderd!", "success")
+            flash("Het recept is verwijderd!", "success")
             return redirect(url_for('index'))
         except:
             print(e)
@@ -242,7 +151,6 @@ def aanpassen(token=None):
 
 
     return render_template("form.html",
-                            nickname=nickname,
                             recept=recept,
                             recept_tags=recept_tags,
                             form=form)
@@ -264,20 +172,5 @@ def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 @app.route('/recepten.db') 
-def recepten_db():
-    current_url = request.url.replace('http://', 'https://', 1)
-    auth = request.args.get('auth', None)
-
-    if auth:
-        if not refrein(auth):
-            return render_template('failure.html', msg="Your auth token did not verify"), 401
-
-    try:
-        cookie = session['name']
-    except:
-        cookie = False
-    
-    if not cookie:
-        return render_template('auth.html', current_url=current_url), 401
-        
+def recepten_db():   
     return send_from_directory(os.path.join(app.root_path, 'db'), 'recepten.db')

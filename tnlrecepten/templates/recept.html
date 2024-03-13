@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% from 'bootstrap5/form.html' import render_field %}
 {% block content %}
-<p class="position-absolute top-0 start-0"><a href="{{ url_for('index') }}">Startpagina</a></p>{% if authenticated %}<p class="position-absolute top-0 end-0"><a href="{{ url_for('aanpassen', token=recept.token) }}">Aanpassen</a></p>{% endif %}
+<p class="position-absolute top-0 start-0"><a href="{{ url_for('index') }}">Startpagina</a></p><p class="position-absolute top-0 end-0"><a href="{{ url_for('aanpassen', token=recept.token) }}">Aanpassen</a></p>
 <br>
 <center class="text-break"><h1><a href="{{ url_for('recept', token=recept.token) }}">{{ recept.titel }}</a></h1></center>
 <br>

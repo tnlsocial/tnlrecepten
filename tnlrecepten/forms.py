@@ -6,7 +6,7 @@ from wtforms.validators import DataRequired, Length
 from .utils.tag_list_field import TagListField
 
 class ReceptForm(FlaskForm):
-    nickname = StringField('Nickname', render_kw={'readonly': True})
+    nickname = StringField('Nickname')
     titel = StringField('Titel', validators=[DataRequired()])
     recept = TextAreaField('Recept', validators=[DataRequired()], render_kw={'rows': 20, "placeholder": """Je kunt markdown gebruiken in dit veld, een snelle opfriscursus:
 # h1 Heading

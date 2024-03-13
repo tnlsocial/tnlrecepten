@@ -1,0 +1,19 @@
+body {
+	max-width: 800px;
+	margin: auto ;
+	padding: 0 16px ;
+  	font-family: Georgia, 'Times New Roman', Times, serif;
+	background-color: #fffaf0;
+}
+
+a {
+	color: black;
+}
+
+@media (min-width: 100em) {
+	#recepten { column-count: 3 ;}
+}
+
+@media (min-width: 55em) {
+	#artlist { column-count: 2 ;}
+}

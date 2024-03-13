@@ -1,0 +1,8 @@
+flask
+Flask-WTF
+Flask_SQLAlchemy
+bootstrap-flask
+markdown
+pynacl
+bleach
+gunicorn

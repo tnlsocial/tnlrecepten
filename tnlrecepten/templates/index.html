@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% from 'bootstrap5/form.html' import render_field %}
+{% block content %}
+    <p class="position-absolute top-0 end-0"><a href="{{ url_for('toevoegen') }}">Voeg iets toe!</a></p>
+    <br>
+    <center class="text-break"><h1><a href={{ url_for('index') }}>#tnl Recepten</a></h1></center>
+    <hr>
+    <br>
+    Tags: {%for tag in tags %}<a href={{ url_for('tags', tag=tag) }}>{{ tag }}</a>, {% endfor %}
+    <br>
+    <br>
+    <p><b>Recepten:</b></p>
+    <ul id="recepten">
+    {% for recept in recepten|reverse %}
+        <li><a href="/recept/{{ recept.token }}">{{ recept.titel }}</a></li>
+    {% endfor %}  
+    </ul>
+    <p class="position-absolute bottom-0 end-0"><a href="{{ url_for('recepten_db') }}">Receptendatabase(sqlite)</a></p>
+{% endblock %}

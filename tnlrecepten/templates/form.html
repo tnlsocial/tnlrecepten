@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% from 'bootstrap5/form.html' import render_field %}
+{% block content %}
+{% if request.url_rule.endpoint == 'toevoegen' %}
+<p class="position-absolute top-0 start-0"><a href="{{ url_for('index') }}">Startpagina</a></p>
+<br>
+<center class="text-break"><h1>Toevoegen aan het receptenboekje</h1></center>
+<form method="POST" action="/toevoegen">
+    <input id="csrf_token" name="csrf_token" type="hidden" value="{{ csrf_token() }}">
+    <div class="mb-3">
+        <label class="form-label" for="nickname">Nickname</label>
+        <input class="form-control" id="nickname" name="nickname" readonly type="text" value="{{ nickname }}">
+    </div>
+
+    <div class="mb-3 required"><label class="form-label" for="titel">Titel</label>
+        <input class="form-control" id="titel" name="titel" required type="text">     
+    </div>
+    
+    <div class="mb-3 required"><label class="form-label" for="recept">Recept</label>
+        <textarea class="form-control" id="recept" name="recept" placeholder="Je kunt markdown gebruiken in dit veld, ter voorbeeld:
+# h1 Heading
+## h2 Heading
+
+**This is bold text**
+
+__This is bold text__
+
+*This is italic text*
+
+_This is italic text_
+
+~~Strikethrough~~
++ Create a list by starting a line with `+`, `-`, or `*`
++ Sub-lists are made by indenting 2 spaces:
+  - Marker character change forces new list start:
+    * Ac tristique libero volutpat at
+    + Facilisis in pretium nisl aliquet
+    - Nulla volutpat aliquam velit" required rows="20" value="ewaeaweawe"></textarea>
+    
+    <div class="mb-3"><label class="form-label" for="tags">Tags</label>
+        <input class="form-control" id="tags" name="tags" placeholder="Voeg hier de hoofdingrediënten toe, gescheiden door een komma" type="text" value="">
+    </div>
+
+    <input class="btn btn-primary btn-md" id="submit" name="submit" type="submit" value="Toevoegen">
+{% elif request.url_rule.endpoint == 'aanpassen' %}
+<p class="position-absolute top-0 start-0"><a href="{{ url_for('index') }}">Startpagina</a></p><p class="position-absolute top-0 end-0"><a href="{{ url_for('aanpassen', token=recept.token) }}?delete=True">Verwijderen</a></p>
+<br>
+<center class="text-break"><h1>Recept aanpassen</h1></center>
+<form method="POST" action="/aanpassen/{{ recept.token }}">
+    <input id="csrf_token" name="csrf_token" type="hidden" value="{{ csrf_token() }}">
+    <div class="mb-3">
+        <label class="form-label" for="nickname">Nickname</label>
+        <input class="form-control" id="nickname" name="nickname" readonly type="text" value="{{ nickname }}">
+    </div>
+
+    <div class="mb-3 required"><label class="form-label" for="titel">Titel</label>
+        <input class="form-control" id="titel" name="titel" required type="text" value="{{ recept.titel }}">     
+    </div>
+    
+    <div class="mb-3 required"><label class="form-label" for="recept">Recept</label>
+        <textarea class="form-control" id="recept" name="recept" placeholder="Je kunt markdown gebruiken in dit veld, ter voorbeeld:
+# h1 Heading
+## h2 Heading
+
+**This is bold text**
+
+__This is bold text__
+
+*This is italic text*
+
+_This is italic text_
+
+~~Strikethrough~~
++ Create a list by starting a line with `+`, `-`, or `*`
++ Sub-lists are made by indenting 2 spaces:
+  - Marker character change forces new list start:
+    * Ac tristique libero volutpat at
+    + Facilisis in pretium nisl aliquet
+    - Nulla volutpat aliquam velit" required rows="20" value="ewaeaweawe">{{ recept.recept }}</textarea>
+
+    <div class="mb-3"><label class="form-label" for="tags">Tags</label>
+        <input class="form-control" id="tags" name="tags" placeholder="Voer hier de hoofdingrediënten toe, gescheiden door een komma" type="text" value="{{ recept_tags }}">
+    </div>
+
+    <input class="btn btn-primary btn-md" id="submit" name="submit" type="submit" value="Aanpassen">
+{% endif %}
+{% endblock %}

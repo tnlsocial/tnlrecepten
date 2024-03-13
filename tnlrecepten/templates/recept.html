@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% from 'bootstrap5/form.html' import render_field %}
+{% block content %}
+<p class="position-absolute top-0 start-0"><a href="{{ url_for('index') }}">Startpagina</a></p>{% if authenticated %}<p class="position-absolute top-0 end-0"><a href="{{ url_for('aanpassen', token=recept.token) }}">Aanpassen</a></p>{% endif %}
+<br>
+<center class="text-break"><h1><a href="{{ url_for('recept', token=recept.token) }}">{{ recept.titel }}</a></h1></center>
+<br>
+<br>
+<p>{{ recept.recept |safe }}</p>
+<hr>
+<p>Bijdrage door <b>{{ recept.nickname }}</b></p>
+<p>{% if recept.last_edit %}Voor het laatst aangepast op: {{ recept.last_edit.strftime('%d-%m-%Y, %T') }}{% else %}Aangemaakt op: {{ recept.time_created.strftime('%d-%m-%Y, %T') }}{% endif %}</p>
+{% if recept.tags %}
+<p>Tags: 
+{% for raw_tag in recept.tags.split(",") %}
+{% set tag = raw_tag.replace('"', "").replace("[", "").replace("]", "").strip() %}
+ <a href="{{ url_for('tags', tag=tag) }}">{{ tag }}</a>, 
+{% endfor %}
+</p>
+{% endif %}
+{% if recept_tags %}
+<p>Recepten met soortgelijke tags:</p>
+    <ul>
+    {%for key, value in recept_tags.items() %}
+    <li><a href={{ url_for('recept', token=key[1]) }}>{{ key[0] }}</a> (<i>{% for i in value %}<a href={{ url_for('tags', tag=i) }}>{{ i }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</i>)</li>
+    {% endfor %}
+    </ul>
+{% endif %}
+</div>
+{% endblock %}

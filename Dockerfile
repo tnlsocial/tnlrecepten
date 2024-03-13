@@ -1,7 +1,6 @@
-FROM python:3.9.8-slim
+FROM python:3.11.2-slim
 EXPOSE 8000
 COPY . /home
 WORKDIR /home
 RUN pip3 install -r requirements.txt
-RUN chmod +x run.sh
-ENTRYPOINT ["sh","run.sh"]
+CMD ["gunicorn", "wsgi:application", "-w", "2", "--threads", "2", "-b", "0.0.0.0:8000", "--access-logfile", "-", "--error-logfile", "-"]
